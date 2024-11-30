@@ -1,2 +1,4 @@
 unsloth_env/
 .venv/ 
+output.log
+weights/

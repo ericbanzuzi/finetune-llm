@@ -1,13 +1,14 @@
 import argparse
 import torch
+import os
 from datasets import load_dataset
 from trl import SFTTrainer
 from transformers import TrainingArguments, DataCollatorForSeq2Seq
 from unsloth import FastLanguageModel, is_bfloat16_supported
 from unsloth.chat_templates import get_chat_template, standardize_sharegpt, train_on_responses_only
 
-WEIGHTS_DIR = '../weights'
-
+WEIGHTS_DIR = "weights"
+SAVE_STEPS = 10 # save every x steps 
 
 # TODO: add documentation
 def get_parser():
@@ -92,6 +93,7 @@ def get_trainer(model, tokenizer, dataset, args):
             gradient_accumulation_steps = args.gradient_accumulation_steps,
             warmup_steps = args.warmup_steps,
             num_train_epochs = args.num_train_epochs,
+            #max_steps = 12, # TODO: delete
             learning_rate = args.learning_rate,
             fp16 = not is_bfloat16_supported(),
             bf16 = is_bfloat16_supported(),
@@ -100,8 +102,11 @@ def get_trainer(model, tokenizer, dataset, args):
             weight_decay = args.weight_decay,
             lr_scheduler_type = args.lr_scheduler_type,
             seed = 42,
-            output_dir = WEIGHTS_DIR,
             report_to = "none", # Use this for WandB etc
+            save_strategy="steps",
+            save_category='best', # save only when better metric is achieved 
+            save_total_limit=2, # keep only the 2 most recent checkpoints 
+            output_dir = WEIGHTS_DIR
         )
     )
 
@@ -116,12 +121,15 @@ def get_trainer(model, tokenizer, dataset, args):
 if __name__ == '__main__':
     parser = get_parser()
     args = parser.parse_args()
-
+        
     model, tokenizer = get_model(args)
-
+    if args.verbose:
+        print('-- Model created --')
 
     dataset = get_dataset(args.dataset)
     tokenizer = get_tokenizer_from_chat_template(tokenizer)
+    if args.verbose:
+        print('-- Dataset and tokenizer created --')
 
     trainer = get_trainer(model, tokenizer, dataset, args)
 
@@ -129,8 +137,11 @@ if __name__ == '__main__':
     start_gpu_memory = round(torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024, 3)
     max_memory = round(gpu_stats.total_memory / 1024 / 1024 / 1024, 3)
     
+    if args.verbose:
+        print('-- Start training --')
     trainer_stats = trainer.train()
-    print('\n! Training done. !')
+    if args.verbose:
+        print('-- Training done --')
 
     if args.verbose:
         print(f"GPU = {gpu_stats.name}. Max memory = {max_memory} GB.")
@@ -145,4 +156,10 @@ if __name__ == '__main__':
         print(f"Peak reserved memory for training = {used_memory_for_lora} GB.")
         print(f"Peak reserved memory % of max memory = {used_percentage} %.")
         print(f"Peak reserved memory for training % of max memory = {lora_percentage} %.")
+
+    model.save_pretrained(f'{WEIGHTS_DIR}/model_baseline')
+    tokenizer.save_pretrained(f'{WEIGHTS_DIR}/tokenizer_baseline')
+
+    if args.verbose:
+        print('-- Model saved --')
 
