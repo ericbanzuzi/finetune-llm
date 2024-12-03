@@ -1,4 +1,10 @@
 unsloth_env/
 .venv/ 
 output.log
-weights/
+results_training/
+secrets.config
+models/
+
+finetuning/modelGGUF
+finetuning/rcarioniporras
+

@@ -23,12 +23,16 @@ def get_parser():
 
     # Training arguments
     parser.add_argument("--batch_size", type=int, required=True)
-    parser.add_argument("--gradient_accumulation_steps", type=int, default=1, help='Number of steps to accumulate gradients before performing a backward pass.') 
+    parser.add_argument("--gradient_accumulation_steps", type=int, default=1, help='Number of steps to accumulate gradients before performing a backward pass.') # DO NOT MODIFY THIS 
     parser.add_argument("--warmup_steps", type=int, default=0, help='Number of steps during which the learning rate is gradually increased from 0 to its initial value.')
     parser.add_argument("--num_train_epochs", type=int, default=1)
     parser.add_argument("--learning_rate", type=int, default=2e-4)
     parser.add_argument("--weight_decay", type=int, default=0.01, help= 'Regularization term that penalizes large weights to prevent overfitting. Encourages smaller weights in the mode')
     parser.add_argument("--lr_scheduler_type", type=str, default='linear')
+    parser.add_argument("--hf", type=str, default=None, help='If you want to save the model to HuggingFace, set hf to your username.')
+    parser.add_argument("--hf_token", type=str, default=None, help='If you want to save the model to HuggingFace, set hf_token to your token from https://huggingface.co/settings/tokens')
+
+
 
     # Dataset
     parser.add_argument("--dataset", type=str, default='mlabonne/FineTome-100k')
@@ -93,7 +97,7 @@ def get_trainer(model, tokenizer, dataset, args):
             gradient_accumulation_steps = args.gradient_accumulation_steps,
             warmup_steps = args.warmup_steps,
             num_train_epochs = args.num_train_epochs,
-            #max_steps = 12, # TODO: delete
+            # max_steps = 12, # TODO: delete
             learning_rate = args.learning_rate,
             fp16 = not is_bfloat16_supported(),
             bf16 = is_bfloat16_supported(),
@@ -104,7 +108,7 @@ def get_trainer(model, tokenizer, dataset, args):
             seed = 42,
             report_to = "none", # Use this for WandB etc
             save_strategy="steps",
-            save_category='best', # save only when better metric is achieved 
+            save_steps = SAVE_STEPS,
             save_total_limit=2, # keep only the 2 most recent checkpoints 
             output_dir = WEIGHTS_DIR
         )
@@ -157,8 +161,9 @@ if __name__ == '__main__':
         print(f"Peak reserved memory % of max memory = {used_percentage} %.")
         print(f"Peak reserved memory for training % of max memory = {lora_percentage} %.")
 
-    model.save_pretrained(f'{WEIGHTS_DIR}/model_baseline')
-    tokenizer.save_pretrained(f'{WEIGHTS_DIR}/tokenizer_baseline')
+    model.save_pretrained('model')
+    tokenizer.save_pretrained('model')
+    
 
     if args.verbose:
         print('-- Model saved --')
