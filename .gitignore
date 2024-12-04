@@ -4,7 +4,7 @@ output.log
 results_training/
 secrets.config
 models/
+weights/
 
 finetuning/modelGGUF
 finetuning/rcarioniporras
-

@@ -7,8 +7,9 @@ from transformers import TrainingArguments, DataCollatorForSeq2Seq
 from unsloth import FastLanguageModel, is_bfloat16_supported
 from unsloth.chat_templates import get_chat_template, standardize_sharegpt, train_on_responses_only
 
-WEIGHTS_DIR = "weights"
-SAVE_STEPS = 10 # save every x steps 
+MODELS_DIR = "models"
+SAVE_STEPS = 10 # save every x steps
+RANDOM_SEED = 42
 
 # TODO: add documentation
 def get_parser():
@@ -29,12 +30,13 @@ def get_parser():
     parser.add_argument("--learning_rate", type=int, default=2e-4)
     parser.add_argument("--weight_decay", type=int, default=0.01, help= 'Regularization term that penalizes large weights to prevent overfitting. Encourages smaller weights in the mode')
     parser.add_argument("--lr_scheduler_type", type=str, default='linear')
+
+    # Hugging Face model deployment
     parser.add_argument("--hf", type=str, default=None, help='If you want to save the model to HuggingFace, set hf to your username.')
     parser.add_argument("--hf_token", type=str, default=None, help='If you want to save the model to HuggingFace, set hf_token to your token from https://huggingface.co/settings/tokens')
     parser.add_argument("--hf_model_name", type=str, default='model', help='Model name to be used in HuggingFace')
     parser.add_argument('--hf_gguf', default=False, action='store_true', help='Store HuggingFace model as gguf')
     parser.add_argument('--hf_push', default=False, action='store_true', help='Store HuggingFace model')
-
 
     # Dataset
     parser.add_argument("--dataset", type=str, default='mlabonne/FineTome-100k')
@@ -65,7 +67,7 @@ def get_model(args):
         lora_dropout = args.lora_dropout, # Supports any, but = 0 is optimized
         bias = "none",    # Supports any, but = "none" is optimized
         use_gradient_checkpointing = "unsloth", # True or "unsloth" for very long context
-        random_state = 42,
+        random_state = RANDOM_SEED,
         use_rslora = False,  # We support rank stabilized LoRA
         loftq_config = None, # And LoftQ
     )
@@ -73,9 +75,10 @@ def get_model(args):
 
 
 def get_dataset(dataset):
-    dataset = load_dataset(dataset, split = "train")
+    dataset = load_dataset(dataset, split="train")
     dataset = standardize_sharegpt(dataset)
-    return dataset.map(formatting_prompts_func, batched = True)
+    return dataset.map(formatting_prompts_func, batched=True)
+
 
 
 def get_tokenizer_from_chat_template(tokenizer):
@@ -98,7 +101,7 @@ def get_trainer(model, tokenizer, dataset, args):
             gradient_accumulation_steps = args.gradient_accumulation_steps,
             warmup_steps = args.warmup_steps,
             num_train_epochs = args.num_train_epochs,
-            # max_steps = 6, # TODO: delete
+            #max_steps = 2, # used for testing - delete
             learning_rate = args.learning_rate,
             fp16 = not is_bfloat16_supported(),
             bf16 = is_bfloat16_supported(),
@@ -106,12 +109,12 @@ def get_trainer(model, tokenizer, dataset, args):
             optim = "adamw_8bit",
             weight_decay = args.weight_decay,
             lr_scheduler_type = args.lr_scheduler_type,
-            seed = 42,
+            seed = RANDOM_SEED,
             report_to = "none", # Use this for WandB etc
             save_strategy="steps",
             save_steps = SAVE_STEPS,
             save_total_limit=2, # keep only the 2 most recent checkpoints 
-            output_dir = WEIGHTS_DIR
+            output_dir = MODELS_DIR
         )
     )
 
@@ -147,8 +150,6 @@ if __name__ == '__main__':
     trainer_stats = trainer.train()
     if args.verbose:
         print('-- Training done --')
-
-    if args.verbose:
         print(f"GPU = {gpu_stats.name}. Max memory = {max_memory} GB.")
         print(f"{start_gpu_memory} GB of memory reserved.")
         used_memory = round(torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024, 3)
@@ -161,17 +162,23 @@ if __name__ == '__main__':
         print(f"Peak reserved memory for training = {used_memory_for_lora} GB.")
         print(f"Peak reserved memory % of max memory = {used_percentage} %.")
         print(f"Peak reserved memory for training % of max memory = {lora_percentage} %.")
-    
-    model.save_pretrained('model')
-    tokenizer.save_pretrained('model')
-
-    if args.hf and args.hf_token:
-        if args.hf_gguf:
-            model.push_to_hub_gguf(f'{args.hf}/{args.hf_model_name}', tokenizer = tokenizer, token = args.hf_token, quantization_method = "q4_k_m")
-        else:
-            model.push_to_hub(f'{args.hf}/{args.hf_model_name}', token = args.hf_token) # Online saving
-            tokenizer.push_to_hub(f'{args.hf}/{args.hf_model_name}', token = args.hf_token) # Online saving
-    
+        
+    # save locally
+    model.save_pretrained(f'{MODELS_DIR}/model_datacentric')
+    tokenizer.save_pretrained(f'{MODELS_DIR}/model_datacentric')
     if args.verbose:
-        print('-- Model saved --')
+        print('-- Model saved locally --')
+
+    # push to hugging face
+    if args.hf_push:
+        if args.hf and args.hf_token:
+            if args.hf_gguf:
+                model.push_to_hub_gguf(f'{args.hf}/{args.hf_model_name}', tokenizer = tokenizer, token = args.hf_token, quantization_method = "q4_k_m")
+            else:
+                model.push_to_hub(f'{args.hf}/{args.hf_model_name}', token = args.hf_token) # Online saving
+                tokenizer.push_to_hub(f'{args.hf}/{args.hf_model_name}', token = args.hf_token) # Online saving
+        
+        if args.verbose:
+            print('-- Model pushed to HF --')
+   
 
