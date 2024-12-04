@@ -31,13 +31,14 @@ def get_parser():
     parser.add_argument("--lr_scheduler_type", type=str, default='linear')
     parser.add_argument("--hf", type=str, default=None, help='If you want to save the model to HuggingFace, set hf to your username.')
     parser.add_argument("--hf_token", type=str, default=None, help='If you want to save the model to HuggingFace, set hf_token to your token from https://huggingface.co/settings/tokens')
-
+    parser.add_argument("--hf_model_name", type=str, default='model', help='Model name to be used in HuggingFace')
+    parser.add_argument('--hf_gguf', default=False, action='store_true', help='Store HuggingFace model as gguf')
+    parser.add_argument('--hf_push', default=False, action='store_true', help='Store HuggingFace model')
 
 
     # Dataset
     parser.add_argument("--dataset", type=str, default='mlabonne/FineTome-100k')
-
-    parser.add_argument('--verbose', '-v', default=False, action='store_true', help="Print more verbose output")
+    parser.add_argument('--verbose', '-v', default=False, action='store_true', help='Print more verbose output')
     return parser
 
 
@@ -97,7 +98,7 @@ def get_trainer(model, tokenizer, dataset, args):
             gradient_accumulation_steps = args.gradient_accumulation_steps,
             warmup_steps = args.warmup_steps,
             num_train_epochs = args.num_train_epochs,
-            # max_steps = 12, # TODO: delete
+            # max_steps = 6, # TODO: delete
             learning_rate = args.learning_rate,
             fp16 = not is_bfloat16_supported(),
             bf16 = is_bfloat16_supported(),
@@ -160,11 +161,17 @@ if __name__ == '__main__':
         print(f"Peak reserved memory for training = {used_memory_for_lora} GB.")
         print(f"Peak reserved memory % of max memory = {used_percentage} %.")
         print(f"Peak reserved memory for training % of max memory = {lora_percentage} %.")
-
+    
     model.save_pretrained('model')
     tokenizer.save_pretrained('model')
-    
 
+    if args.hf and args.hf_token:
+        if args.hf_gguf:
+            model.push_to_hub_gguf(f'{args.hf}/{args.hf_model_name}', tokenizer = tokenizer, token = args.hf_token, quantization_method = "q4_k_m")
+        else:
+            model.push_to_hub(f'{args.hf}/{args.hf_model_name}', token = args.hf_token) # Online saving
+            tokenizer.push_to_hub(f'{args.hf}/{args.hf_model_name}', token = args.hf_token) # Online saving
+    
     if args.verbose:
         print('-- Model saved --')
 
