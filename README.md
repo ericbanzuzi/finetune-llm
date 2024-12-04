@@ -1,7 +1,7 @@
 # Fine-Tune LLM with Unsloth
 
 ---
-## Blabla - notekeeping  
+## 
 TODO 
 
 unsloth/Llama-3.2-3B-bnb-4bi
@@ -23,10 +23,10 @@ TODO
 
 ---
 # Setting up a training environment in GCP with Unsloth
-## 1. Create a Google and GCP account
+### 1. Create a Google and GCP account
 If you don't already have a Google account, [create one here](https://accounts.google.com/signup). Next, sign up for Google Cloud Platform (GCP) at [GCP Console](https://console.cloud.google.com/).
 
-## 2. Set Up a New GCP Project and Enable Billing
+### 2. Set Up a New GCP Project and Enable Billing
 1. Log in to the [GCP Console](https://console.cloud.google.com/).
 2. Create a new project:
    - Click on the **Select a project** dropdown in the top navigation bar.
@@ -35,7 +35,7 @@ If you don't already have a Google account, [create one here](https://accounts.g
    - Navigate to **Billing** in the left-hand menu.
    - Link your project to a billing account.
 
-## 3. Enable Required APIs
+### 3. Enable Required APIs
 To ensure the smooth deployment of resources, enable the necessary APIs:
 1. Go to **APIs & Services > Library** in the GCP Console.
 2. Enable the following APIs:
@@ -43,28 +43,105 @@ To ensure the smooth deployment of resources, enable the necessary APIs:
    - **Cloud Deployment Manager V2 API**
    - **Cloud Runtime Configuration API**
 
-## 4. Add Quota
+### 4. Add Quota
 To ensure the smooth deployment of resources, enable the necessary APIs:
 1. Go to **IAM & Admin > Quotas & System Limits** in the GCP Console.
 2. Request a GPU quota by editing the value for **GPU (all regions)** from 0 to 1. If you choose more than 1, it is likely that the request will be denied. This is part of the **Compute Engine API** engine.
 3. Wait for the Quota to be approved. This might take a few minutes.
 
-## 5. Find the Deep Learning VM template from GCP Market place
+### 5. Find the Deep Learning VM template from GCP Market place
 1. Go to **Market Place** and search for "deep learning vm", or optionally click [follow this link](https://cloud.google.com/deep-learning-vm/docs/pytorch_start_instance).
 2. Follow the instructions after pressing **Launch**.
 
-## 6. Selecting VM specifications
+### 6. Selecting VM specifications
 1. Select a zone for the VM. Some zones might not have available resources so you might have to try different ones. An overview of zones and their GPUs can be found [here](https://cloud.google.com/compute/docs/gpus) 
 2. Use the following setups for a VM instance with a T4 GPU:
     - **Machine Type:** Choose a GPU-enabled machine, such as `n1-highmem-2` with a compatible GPU (e.g., NVIDIA Tesla T4).
     - **Framework:** Choose a Pytorch with CUDA 12.1 or 12.4 and Python 3.10.
     - Check the option for "Install NVIDIA GPU driver automatically on first startup?" 
     - Check the option for "Enable access to JupyterLab via URL instead of SSH. (Beta)" 
-2. 
+2. Press deploy and wait for the VM instance to start.
 
-## 7. 
+### 7. Start and Install the gcloud CLI
+
+Once your VM is up and running, you’ll need to set up the `gcloud` command-line interface (CLI) to interact with your GCP project.
+
+1. **Install the gcloud CLI**:
+   - Open a terminal on your local machine or in the VM.
+   - Follow the [official instructions](https://cloud.google.com/sdk/docs/install) for your operating system. For Mac with brew, you can use:
+     ```bash
+     brew install --cask google-cloud-sdk 
+     ```
+   - Confirm the installation by running:
+     ```bash
+     gcloud --version
+     ```
+
+2. **Authenticate the gcloud CLI**:
+   - Log in to your Google account:
+     ```bash
+     gcloud auth login
+     ```
+     This will open a browser for you to authenticate. If you’re using a VM without a browser, use `gcloud auth login --no-launch-browser` and follow the terminal instructions.
+
+3. **Set up the project**:
+   - Select your project:
+     ```bash
+     gcloud config set project [PROJECT_ID]
+     ```
+     Replace `[PROJECT_ID]` with your actual GCP project ID.
+
+4. **Verify the gcloud CLI setup**:
+   - Test connectivity to your VM:
+     ```bash
+     gcloud compute instances list
+     ```
+     This command lists all instances in your project, verifying that `gcloud` can connect.
+
+### 8. Set Up VS Code for Your GCP Environment
+
+Using VS Code can streamline your development and allow you to work efficiently with the GCP environment.
+
+1. **Install VS Code**:
+   - Download and install Visual Studio Code from the [official website](https://code.visualstudio.com/).
+
+2. **Install the VS Code Extensions**:
+   - Open VS Code and install the following extensions:
+     - **Remote - SSH**: For connecting to your GCP VM over SSH.
+     - **Python**: For Python development.
+     - **Pylance**: For python type checking.
+
+3. **Set Up SSH Access**:
+   - In your terminal, set up an SSH key pair (if not already set up):
+     ```bash
+     ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
+     ```
+     Save the key to the default location (`~/.ssh/id_rsa`) or specify another path.
+   - Add the public key to your GCP project:
+     ```bash
+     gcloud compute ssh [INSTANCE_NAME] --project [PROJECT_ID] --zone [ZONE] --ssh-key-file ~/.ssh/id_rsa.pub
+     ```
+     Replace `[INSTANCE_NAME]`, `[PROJECT_ID]`, and `[ZONE]` with your VM details.
+
+4. **Connect to the VM in VS Code**:
+   - Open VS Code and click the green "><" icon in the bottom-left corner.
+   - Select **Remote-SSH: Connect to Host...**.
+   - Add your GCP VM's SSH configuration. For example, if your VM's IP is `203.0.113.10`, your `~/.ssh/config` should look like:
+     ```
+     Host gcp-vm
+         HostName 203.0.113.10
+         User your-username
+         IdentityFile ~/.ssh/id_rsa
+     ```
+   - Choose the `gcp-vm` host to connect. VS Code will set up the connection.
+
+You are now set up to develop on GCP using VS Code, with direct access to your VM!
 
 
+
+### Other useful gcloud cli commands
+
+TODO:
 
 ---
 
