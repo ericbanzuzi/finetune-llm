@@ -7,6 +7,7 @@ from trl import SFTTrainer
 from transformers import TrainingArguments, DataCollatorForSeq2Seq
 from unsloth import FastLanguageModel, is_bfloat16_supported
 from unsloth.chat_templates import get_chat_template, standardize_sharegpt, train_on_responses_only
+import sys
 
 MODELS_DIR = "models"
 SAVE_STEPS = 10 # save every x steps
@@ -41,14 +42,9 @@ def get_parser():
 
     # Dataset
     parser.add_argument("--dataset", type=str, default='mlabonne/FineTome-100k', help='Choose from for example: [arcee-ai/infini-instruct-top-500k, mlabonne/FineTome-100k]')
+    parser.add_argument("--dataset_file", type=str, default=None, help='Choose from a file in data folder')
     parser.add_argument('--verbose', '-v', default=False, action='store_true', help='Print more verbose output')
     return parser
-
-
-def formatting_prompts_func(examples):
-    convos = examples["conversations"]
-    texts = [tokenizer.apply_chat_template(convo, tokenize = False, add_generation_prompt = False) for convo in convos]
-    return { "text" : texts, }
 
 
 def get_model(args):
@@ -75,9 +71,23 @@ def get_model(args):
     return model, tokenizer
 
 
-def get_dataset(dataset):
-    dataset = load_dataset(dataset, split="train")
+def get_dataset(dataset_str, tokenizer, custom_data=False):
+    if custom_data:
+        dataset = load_dataset('parquet', data_files=dataset)['train']
+    else:
+        dataset = load_dataset(dataset_str, split="train")
+    
+    if dataset_str == "arcee-ai/infini-instruct-top-500k" or dataset_str == "arcee-ai/The-Tome":
+        # Select the first 200 000 random samples (set a seed for reproducibility)
+        shuffled_dataset = dataset.shuffle(seed=RANDOM_SEED)
+        dataset = shuffled_dataset.select(range(200000))
+
     dataset = standardize_sharegpt(dataset)
+    def formatting_prompts_func(examples):
+        convos = examples["conversations"]
+        texts = [tokenizer.apply_chat_template(convo, tokenize = False, add_generation_prompt = False) for convo in convos]
+        return { "text" : texts, }
+
     return dataset.map(formatting_prompts_func, batched=True)
 
 
@@ -135,7 +145,10 @@ if __name__ == '__main__':
     if args.verbose:
         print('-- Model created --')
 
-    dataset = get_dataset(args.dataset)
+    if args.dataset_file:
+        dataset = get_dataset(args.dataset_file, tokenizer, custom_data=True)
+    else:
+        dataset = get_dataset(args.dataset, tokenizer)
     tokenizer = get_tokenizer_from_chat_template(tokenizer)
     if args.verbose:
         print('-- Dataset and tokenizer created --')
