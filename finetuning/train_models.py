@@ -73,7 +73,7 @@ def get_model(args):
 
 def get_dataset(dataset_str, tokenizer, custom_data=False):
     if custom_data:
-        dataset = load_dataset('parquet', data_files=dataset)['train']
+        dataset = load_dataset('parquet', data_files=dataset_str)['train']
     else:
         dataset = load_dataset(dataset_str, split="train")
     
