@@ -186,11 +186,22 @@ if __name__ == '__main__':
     # push to hugging face
     if args.hf_push:
         if args.hf and args.hf_token:
-            if args.hf_gguf:
-                model.push_to_hub_gguf(f'{args.hf}/{args.hf_model_name}', tokenizer = tokenizer, token = args.hf_token, quantization_method = "q4_k_m")
-            else:
-                model.push_to_hub(f'{args.hf}/{args.hf_model_name}', token = args.hf_token) # Online saving
-                tokenizer.push_to_hub(f'{args.hf}/{args.hf_model_name}', token = args.hf_token) # Online saving
+            hf = args.hf
+            hf_token = args.hf_token
+        else:
+            try:
+                with open('secrets.config') as secrets:,
+                    file_content = secrets.read().split('\n')
+                hf = file_content[0]
+                hf_token = file_content[1]
+            except Exception:
+                print('Oops, failed to push to HF!! Make sure you have you username and token in a secrets.config file.')
+
+        if args.hf_gguf:
+                model.push_to_hub_gguf(f'{hf}/{args.hf_model_name}', tokenizer = tokenizer, token = hf_token, quantization_method = "q4_k_m")
+        else:
+            model.push_to_hub(f'{hf}/{args.hf_model_name}', token = hf_token) # Online saving
+            tokenizer.push_to_hub(f'{hf}/{args.hf_model_name}', token = hf_token) # Online saving
         
         if args.verbose:
             print('-- Model pushed to HF --')
