@@ -19,7 +19,9 @@ To manage the computational demands of training, we used **Google Cloud Computin
 --- 
 
 ## Access to chatbots
-
+1. (Baseline fine-tuned model)[https://huggingface.co/spaces/ericbanzuzi/finetuned-llm]
+2. Data-centric fine-tuned model:
+3. Model-centric fine-tuned model:
 ---  
 
 ## Finetuning Strategies  
