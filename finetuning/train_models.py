@@ -1,3 +1,4 @@
+
 import argparse
 import torch
 import os
@@ -19,16 +20,16 @@ def get_parser():
     parser.add_argument("--load_in_4bit", type=bool, default=True, help='Use 4bit quantization to reduce memory usage. Can be False.') 
     parser.add_argument("--model_name", type=str, required=True, help='Choose one of the following models: [unsloth/Llama-3.2-1B-bnb-4bit, unsloth/Llama-3.2-1B-Instruct-bnb-4bit, unsloth/Llama-3.2-3B-bnb-4bit, unsloth/Llama-3.2-3B-Instruct-bnb-4bit]')
     parser.add_argument("--r", type=int, default=16, help='Controls the capacity of the LoRA layers. A higher value increases the expressiveness of the added parameters but also increases computational cost. Suggested: 8, 16, 32, 64, 128') 
-    parser.add_argument("--lora_dropout", type=int, default=0, help='The dropout rate for the LoRA layers')
-    parser.add_argument("--lora_alpha", type=int, default=16, help='Scales the LoRA updates before adding them to the original weights, balancing the contribution of LoRA updates during training')
+    parser.add_argument("--lora_dropout", type=float, default=0, help='The dropout rate for the LoRA layers')
+    parser.add_argument("--lora_alpha", type=float, default=16, help='Scales the LoRA updates before adding them to the original weights, balancing the contribution of LoRA updates during training')
 
     # Training arguments
     parser.add_argument("--batch_size", type=int, required=True)
     parser.add_argument("--gradient_accumulation_steps", type=int, default=1, help='Number of steps to accumulate gradients before performing a backward pass.') # DO NOT MODIFY THIS 
     parser.add_argument("--warmup_steps", type=int, default=0, help='Number of steps during which the learning rate is gradually increased from 0 to its initial value.')
     parser.add_argument("--num_train_epochs", type=int, default=1)
-    parser.add_argument("--learning_rate", type=int, default=2e-4)
-    parser.add_argument("--weight_decay", type=int, default=0.01, help= 'Regularization term that penalizes large weights to prevent overfitting. Encourages smaller weights in the mode')
+    parser.add_argument("--learning_rate", type=float, default=2e-4)
+    parser.add_argument("--weight_decay", type=float, default=0.01, help= 'Regularization term that penalizes large weights to prevent overfitting. Encourages smaller weights in the mode')
     parser.add_argument("--lr_scheduler_type", type=str, default='linear')
 
     # Hugging Face model deployment
@@ -39,7 +40,7 @@ def get_parser():
     parser.add_argument('--hf_push', default=False, action='store_true', help='Store HuggingFace model')
 
     # Dataset
-    parser.add_argument("--dataset", type=str, default='mlabonne/FineTome-100k')
+    parser.add_argument("--dataset", type=str, default='mlabonne/FineTome-100k', help='Choose from for example: [arcee-ai/infini-instruct-top-500k, mlabonne/FineTome-100k]')
     parser.add_argument('--verbose', '-v', default=False, action='store_true', help='Print more verbose output')
     return parser
 
@@ -181,4 +182,3 @@ if __name__ == '__main__':
         if args.verbose:
             print('-- Model pushed to HF --')
    
-
