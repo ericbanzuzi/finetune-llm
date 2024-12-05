@@ -190,7 +190,7 @@ if __name__ == '__main__':
             hf_token = args.hf_token
         else:
             try:
-                with open('secrets.config') as secrets:,
+                with open('secrets.config') as secrets:
                     file_content = secrets.read().split('\n')
                 hf = file_content[0]
                 hf_token = file_content[1]
