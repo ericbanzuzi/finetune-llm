@@ -42,6 +42,7 @@ TODO
 
 ---
 # Setting up a training environment in GCP with Unsloth
+
 ### 1. Create a Google and GCP account
 If you don't already have a Google account, [create one here](https://accounts.google.com/signup). Next, sign up for Google Cloud Platform (GCP) at [GCP Console](https://console.cloud.google.com/).
 
@@ -160,7 +161,8 @@ You are now set up to develop on GCP using VS Code, with direct access to your V
 
 ### Other useful gcloud cli commands
 
-TODO:
+> [!TIP]
+> TODO: 
 
 ---
 
@@ -232,3 +234,20 @@ pip install --no-deps trl peft accelerate bitsandbytes
 ```
 
 --- 
+DELETE TODO:
+
+> [!NOTE]
+> Highlights information that users should take into account, even when skimming.
+
+> [!TIP]
+> Optional information to help a user be more successful.
+
+> [!IMPORTANT]
+> Crucial information necessary for users to succeed.
+
+> [!WARNING]
+> Critical content demanding immediate user attention due to potential risks.
+
+> [!CAUTION]
+> Negative potential consequences of an action.
+
