@@ -14,7 +14,7 @@ To manage the computational demands of training, we used **Google Cloud Computin
 - **Model**: we used the open-source model **[Llama-3.2-1B-Instruct-bnb-4bit](https://huggingface.co/unsloth/Llama-3.2-1B-Instruct-bnb-4bit)** as a base for fine-tuning.  
 - **Datasets**: the project used two datasets depending on the fine-tuning strategy:  
   - **[Fine Tome 100k](https://huggingface.co/datasets/mlabonne/FineTome-100k)**. 
-  - **[Fine Tome 500k](https://huggingface.co/datasets/arcee-ai/infini-instruct-top-500k)**.
+  - **[The Tome](https://huggingface.co/datasets/arcee-ai/The-Tome)**.
 
 --- 
 
@@ -122,47 +122,46 @@ Once your VM is up and running, you’ll need to set up the `gcloud` command-lin
 
 Using VS Code can streamline your development and allow you to work efficiently with the GCP environment.
 
-1. **Install VS Code**:
-   - Download and install Visual Studio Code from the [official website](https://code.visualstudio.com/).
-
-2. **Install the VS Code Extensions**:
+1. **Install the VS Code Extensions**:
    - Open VS Code and install the following extensions:
      - **Remote - SSH**: For connecting to your GCP VM over SSH.
      - **Python**: For Python development.
      - **Pylance**: For python type checking.
 
-3. **Set Up SSH Access**:
-   - In your terminal, set up an SSH key pair (if not already set up):
+2. **Set Up SSH Access**:
+   - In your terminal, set up an SSH connection:
      ```bash
-     ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
+     gcloud compute ssh [INSTANCE_NAME] --project [PROJECT_ID] --zone [ZONE]
      ```
-     Save the key to the default location (`~/.ssh/id_rsa`) or specify another path.
-   - Add the public key to your GCP project:
-     ```bash
-     gcloud compute ssh [INSTANCE_NAME] --project [PROJECT_ID] --zone [ZONE] --ssh-key-file ~/.ssh/id_rsa.pub
-     ```
-     Replace `[INSTANCE_NAME]`, `[PROJECT_ID]`, and `[ZONE]` with your VM details.
+     Replace `[INSTANCE_NAME]`, `[PROJECT_ID]`, and `[ZONE]` with your VM details. If a key `~/.ssh/google_compute_engine` does not exist, it will be generated for you. Otherwise it will be used as the ssh key file for the project.
 
 4. **Connect to the VM in VS Code**:
    - Open VS Code and click the green "><" icon in the bottom-left corner.
    - Select **Remote-SSH: Connect to Host...**.
    - Add your GCP VM's SSH configuration. For example, if your VM's IP is `203.0.113.10`, your `~/.ssh/config` should look like:
      ```
-     Host gcp-vm
+     Host dl-vm
          HostName 203.0.113.10
          User your-username
-         IdentityFile ~/.ssh/id_rsa
+         IdentityFile ~/.ssh/google_compute_engine
      ```
-   - Choose the `gcp-vm` host to connect. VS Code will set up the connection.
+   - Choose the `dl-vm` host to connect. VS Code will set up the connection. Sometimes you might be required to press Retry a couple of times before the connections is established.
 
 You are now set up to develop on GCP using VS Code, with direct access to your VM!
 
 
-
-### Other useful gcloud cli commands
-
-> [!TIP]
-> TODO: 
+> [!TIP] 
+> To get started with your VM, we have listed some usefult commands
+> 
+> **Start VM:** `gcloud compute instances start [INSTANCE_NAME] --zone [ZONE] --project [PROJECT_ID]`
+> 
+> **Stop VM:** `gcloud compute instances stop [INSTANCE_NAME] --zone [ZONE] --project [PROJECT_ID]`
+> 
+> **Copy from Local to VM::** `gcloud compute scp --recurse /path/to/local/file [INSTANCE_NAME]:/path/to/destination --zone [ZONE]  --project [PROJECT_ID]`
+>
+> **Copy from VM to Local:** `gcloud compute scp --recurse [INSTANCE_NAME]:/path/to/remote/file /path/to/local/destination --zone [ZONE] --project [PROJECT_ID]`
+>
+> 
 
 ---
 
