@@ -18,10 +18,11 @@ To manage the computational demands of training, we used **Google Cloud Computin
 
 --- 
 
-## Access to chatbots
-1. [Baseline fine-tuned model](https://huggingface.co/spaces/ericbanzuzi/finetuned-llm)
-2. [Data-centric fine-tuned model](https://huggingface.co/spaces/ericbanzuzi/the-tome-llm)
-3. [Model-centric fine-tuned model](TODO: ADD):
+## Access to chatbots and models
+1. [Baseline fine-tuned chatbot](https://huggingface.co/spaces/ericbanzuzi/finetuned-llm) and [model](https://huggingface.co/rcarioniporras/model_baseline_llama).
+2. [Data-centric fine-tuned chatbot](https://huggingface.co/spaces/ericbanzuzi/the-tome-llm) and [model](https://huggingface.co/ericbanzuzi/model_datacentric_llama_gguf).
+3. [Model-centric fine-tuned chatbot](https://huggingface.co/spaces/rcarioniporras/finetuned-llm) and [model](https://huggingface.co/rcarioniporras/model_modelcentric_llama_gguf).
+
 ---  
 
 ## Finetuning Strategies  
