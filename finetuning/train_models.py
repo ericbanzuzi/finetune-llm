@@ -196,7 +196,8 @@ if __name__ == '__main__':
                 hf_token = file_content[1]
             except Exception:
                 print('Oops, failed to push to HF!! Make sure you have you username and token in a secrets.config file.')
-
+       
+        FastLanguageModel.for_inference(model) # enable native 2x faster inference
         if args.hf_gguf:
                 model.push_to_hub_gguf(f'{hf}/{args.hf_model_name}', tokenizer = tokenizer, token = hf_token, quantization_method = "q4_k_m")
         else:
