@@ -3,8 +3,7 @@ unsloth_env/
 output.log
 results_training/
 secrets.config
-models/
-weights/
+models/weights
 
 finetuning/modelGGUF
 finetuning/rcarioniporras
