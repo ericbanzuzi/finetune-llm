@@ -8,7 +8,7 @@ The fine-tuned LLMs are deployed using a **Gradio UI** hosted on **Hugging Face 
 ### Challenges and Solutions
 During the setup, we faced issues installing **Unsloth** due to dependency compatibility problems. To overcome this, we identified and documented 2 alternative solutions, included at the end of the README. One of these uses a Python environment and the second one uses a Conda environment. 
 
-To manage the computational demands of training, we used **Google Cloud Computing (GCC)**, taking advantage of a free credit gift card received during sign-up. The README also includes step-by-step instructions on setting up the GCC environment, including integrating it with **VS Code** for development and training.  
+To manage the computational demands of training, we used **Google Cloud Platform (GCP)**, taking advantage of a free credit gift card received during sign-up. The README also includes step-by-step instructions on setting up the GCC environment, including integrating it with **VS Code** for development and training.  
 
 ### Model and Datasets  
 - **Model**: we used the open-source model **[Llama-3.2-1B-Instruct-bnb-4bit](https://huggingface.co/unsloth/Llama-3.2-1B-Instruct-bnb-4bit)** as a base for fine-tuning.  
