@@ -6,7 +6,7 @@ This project focuses on **Parameter-Efficient Fine-Tuning (PEFT)** of a **Large 
 The fine-tuned LLMs are deployed using a **Gradio UI** hosted on **Hugging Face Spaces**, allowing for an interactive way to explore the model's capabilities. 
 
 ### Challenges and Solutions
-During the setup, we faced issues installing **Unsloth** due to dependency compatibility problems. To overcome this, we identified and documented 2 alternative solutions, included at the end of the README. One of this uses Python environment and the second one Conda environment. 
+During the setup, we faced issues installing **Unsloth** due to dependency compatibility problems. To overcome this, we identified and documented 2 alternative solutions, included at the end of the README. One of these uses a Python environment and the second one uses a Conda environment. 
 
 To manage the computational demands of training, we used **Google Cloud Computing (GCC)**, taking advantage of a free credit gift card received during sign-up. The README also includes step-by-step instructions on setting up the GCC environment, including integrating it with **VS Code** for development and training.  
 
@@ -21,7 +21,7 @@ To manage the computational demands of training, we used **Google Cloud Computin
 ## Access to chatbots
 1. [Baseline fine-tuned model](https://huggingface.co/spaces/ericbanzuzi/finetuned-llm)
 2. [Data-centric fine-tuned model](https://huggingface.co/spaces/ericbanzuzi/the-tome-llm)
-3. Model-centric fine-tuned model:
+3. [Model-centric fine-tuned model](TODO: ADD):
 ---  
 
 ## Finetuning Strategies  
@@ -30,9 +30,20 @@ To optimize the performance of our fine-tuned LLM, we explored 2 strategies:
 ### 1. **Data-Centric**  
 In the data-centric approach, we aimed to improve model performance by increasing the amount of training data. Initially, we fine-tuned the model using the **Fine Tome 100k** dataset. To further improve the model's ability to generalize and respond better to diverse instructions, we scaled up to the **Fine Tome 500k** dataset while keeping all other hyperparameters constant. This larger dataset provided a broader range of instruction styles and content, which increased the exposure of the model to varied contexts. 
 
-### 2. **Model-Centric**  
-The model-centric approach focused on fine-tuning the hyperparameters to maximize the model's performance without modifying the underlying data. We experimented with various hyperparameter configurations, including:  
-- **TODO**: 
+### 2. **Model-Centric**
+The model-centric approach focuses on modifying some of the hyperparameters from the baseline to maximize the model's performance without modifying the underlying data. The goal was to fine-tune the training process and balance the trade-off between learning and overfitting, resulting in a more robust and generalizable model. Given the computational demand of the training, we only tested one set of parameter modifications, which can be seen next:
+
+1. **Increased Training Time**:
+   - Extended the training duration from **2 epochs** to **3 epochs** to allow the model to learn more complex representations.
+   - This modification was based on the fact that additional epochs could improve learning, as long as overfitting is addressed.
+
+2. **Increased Weight Decay**:
+   - Raised the weight decay value from **0.01** to **0.025**.
+   - Weight decay serves as a regularization technique, penalizing large weights to reduce the risk of overfitting. We decided to increase it to reduce the chances of overfitting, given the longer training time that we used.
+  
+3. **Increased Warm-Up Steps**:
+   - Increased the number of warm-up steps from **0** to **5**.
+   - Warm-up steps increase the learning rate from 0 to its initial value (2e-4) over the specified number of steps. We decided to change it from 0 to 5 because they help the model adjust gradually to the training process by avoiding sudden large weight updates at the start. This can prevent instability, especially in the initial stages when the model might otherwise make big updates due to high learning rates.
 
 ---
 ## Results
