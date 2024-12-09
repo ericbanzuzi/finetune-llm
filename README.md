@@ -47,9 +47,26 @@ The model-centric approach focuses on modifying some of the hyperparameters from
    - Warm-up steps increase the learning rate from 0 to its initial value (2e-4) over the specified number of steps. We decided to change it from 0 to 5 because they help the model adjust gradually to the training process by avoiding sudden large weight updates at the start. This can prevent instability, especially in the initial stages when the model might otherwise make big updates due to high learning rates.
 
 ---
-## Results
 
-TODO
+### Results
+
+To evaluate the performance of our fine-tuned models, we used a performance metric derived from scoring their answers to a set of 10 questions we made. These questions were designed to assess the models' ability to follow instructions with a focus on mathematics and programming tasks. The questions and answers files can be found under `/testing`. 
+
+The evaluation was done using ChatGPT-4o as a grader. For each question, ChatGPT-4 scored the correctness of the models' answers on a scale from 1 to 10, where:
+- 10 indicated the response was as accurate and complete as possible,
+- 1 indicated the response was completely incorrect.
+
+The table below summarizes the train loss and average performance metric for the three models:
+
+| Model          | Train Loss | Performance Metric |
+|----------------|------------|-----------|
+| **Baseline**   | 0.79360    | 6.3       |
+| **Model-Centric** | 0.76986    | 5.7       |
+| **Data-Centric**  | 0.86005    | 7.6       |
+
+> [!IMPORTANT]
+> - **Data-Centric Fine-Tuning** achieved the highest performance metric score (7.6), indicating that increasing the dataset size and exposing the model to more diverse instruction styles improved its ability to respond accurately to the evaluation questions.
+> - **Model-Centric Fine-Tuning** had the lowest performance metric score (5.7) but achieved the best training loss (0.76). While the hyperparameter adjustments improved the training loss, we believe they may have led to overfitting. For instance, after looking at the results from the test set, we saw that, on question 8, which involved a simple probability calculation, this model failed to produce the correct result, whereas the other two models succeeded.
 
 
 ---
@@ -242,23 +259,6 @@ Install **unsloth** and other dependencies:
 ```bash
 pip install "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"
 pip install --no-deps trl peft accelerate bitsandbytes
-```
+``` 
 
---- 
-DELETE TODO:
-
-> [!NOTE]
-> Highlights information that users should take into account, even when skimming.
-
-> [!TIP]
-> Optional information to help a user be more successful.
-
-> [!IMPORTANT]
-> Crucial information necessary for users to succeed.
-
-> [!WARNING]
-> Critical content demanding immediate user attention due to potential risks.
-
-> [!CAUTION]
-> Negative potential consequences of an action.
 
