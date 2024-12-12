@@ -13,24 +13,23 @@ MODELS_DIR = "models"
 SAVE_STEPS = 10 # save every x steps
 RANDOM_SEED = 42
 
-# TODO: add documentation
 def get_parser():
     parser = argparse.ArgumentParser()
     # Model arguments
-    parser.add_argument("--max_seq_length", type=int, default=2048)
+    parser.add_argument("--max_seq_length", type=int, default=2048,  help=' Maximum sequence length for input text. Longer sequences require more memory.')
     parser.add_argument("--load_in_4bit", type=bool, default=True, help='Use 4bit quantization to reduce memory usage. Can be False.') 
-    parser.add_argument("--model_name", type=str, required=True, help='Choose one of the following models: [unsloth/Llama-3.2-1B-bnb-4bit, unsloth/Llama-3.2-1B-Instruct-bnb-4bit, unsloth/Llama-3.2-3B-bnb-4bit, unsloth/Llama-3.2-3B-Instruct-bnb-4bit]')
-    parser.add_argument("--r", type=int, default=16, help='Controls the capacity of the LoRA layers. A higher value increases the expressiveness of the added parameters but also increases computational cost. Suggested: 8, 16, 32, 64, 128') 
-    parser.add_argument("--lora_dropout", type=float, default=0, help='The dropout rate for the LoRA layers')
-    parser.add_argument("--lora_alpha", type=float, default=16, help='Scales the LoRA updates before adding them to the original weights, balancing the contribution of LoRA updates during training')
+    parser.add_argument("--model_name", type=str, required=True, help='The specific pre-trained model to use. Choose for example one of the following models: [unsloth/Llama-3.2-1B-bnb-4bit, unsloth/Llama-3.2-1B-Instruct-bnb-4bit, unsloth/Llama-3.2-3B-bnb-4bit, unsloth/Llama-3.2-3B-Instruct-bnb-4bit]')
+    parser.add_argument("--r", type=int, default=16, help='Controls the rank of the LoRA layers. A higher value retains more information but also increases computational cost. Suggested: 8, 16, 32, 64, 128') 
+    parser.add_argument("--lora_dropout", type=float, default=0, help='Probability of zeroing out elements in LoRA matrices for regularization')
+    parser.add_argument("--lora_alpha", type=float, default=16, help='Scale factor for the LoRA matrices contributions. It updates before adding them to the original weights, balancing the contribution of LoRA updates during training.')
 
     # Training arguments
     parser.add_argument("--batch_size", type=int, required=True)
-    parser.add_argument("--gradient_accumulation_steps", type=int, default=1, help='Number of steps to accumulate gradients before performing a backward pass.') # DO NOT MODIFY THIS 
+    parser.add_argument("--gradient_accumulation_steps", type=int, default=1, help='Number of steps to accumulate gradients before performing a backward pass. Higher value: increasing the batch size without requiring additional memory.')
     parser.add_argument("--warmup_steps", type=int, default=0, help='Number of steps during which the learning rate is gradually increased from 0 to its initial value.')
     parser.add_argument("--num_train_epochs", type=int, default=1)
-    parser.add_argument("--learning_rate", type=float, default=2e-4)
-    parser.add_argument("--weight_decay", type=float, default=0.01, help= 'Regularization term that penalizes large weights to prevent overfitting. Encourages smaller weights in the mode')
+    parser.add_argument("--learning_rate", type=float, default=2e-4, help='The rate at which the model updates its parameters during training. Higher: faster convergence but risks overshooting optimal parameters.')
+    parser.add_argument("--weight_decay", type=float, default=0.01, help= 'Regularization term that penalizes large weights to prevent overfitting. Encourages smaller weights in the model.')
     parser.add_argument("--lr_scheduler_type", type=str, default='linear')
 
     # Hugging Face model deployment
@@ -41,7 +40,7 @@ def get_parser():
     parser.add_argument('--hf_push', default=False, action='store_true', help='Store HuggingFace model')
 
     # Dataset
-    parser.add_argument("--dataset", type=str, default='mlabonne/FineTome-100k', help='Choose from for example: [arcee-ai/infini-instruct-top-500k, mlabonne/FineTome-100k]')
+    parser.add_argument("--dataset", type=str, default='mlabonne/FineTome-100k', help='Choose from for example: [arcee-ai/The-Tome, mlabonne/FineTome-100k]')
     parser.add_argument("--dataset_file", type=str, default=None, help='Choose from a file in data folder')
     parser.add_argument('--verbose', '-v', default=False, action='store_true', help='Print more verbose output')
     return parser
@@ -65,8 +64,8 @@ def get_model(args):
         bias = "none",    # Supports any, but = "none" is optimized
         use_gradient_checkpointing = "unsloth", # True or "unsloth" for very long context
         random_state = RANDOM_SEED,
-        use_rslora = False,  # We support rank stabilized LoRA
-        loftq_config = None, # And LoftQ
+        use_rslora = False,  # Enables rank-stable LoRA 
+        loftq_config = None, # A quantization method for weights and initialization of LoRA - Note: set to None as is not needed if already using a quantized model
     )
     return model, tokenizer
 
@@ -93,7 +92,6 @@ def get_dataset(dataset_str, tokenizer, custom_data=False):
 
 
 def get_tokenizer_from_chat_template(tokenizer):
-     # TODO: maybe 3.2?
     return get_chat_template(tokenizer, chat_template = "llama-3.1")
 
 
@@ -129,7 +127,6 @@ def get_trainer(model, tokenizer, dataset, args):
         )
     )
 
-    # TODO: learn the meaning of this method
     return train_on_responses_only(
         trainer, 
         instruction_part = "<|start_header_id|>user<|end_header_id|>\n\n",
