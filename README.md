@@ -22,6 +22,7 @@ To manage the computational demands of training, we used **Google Cloud Platform
 1. [Baseline fine-tuned chatbot](https://huggingface.co/spaces/ericbanzuzi/finetuned-llm) and [model](https://huggingface.co/rcarioniporras/model_baseline_llama).
 2. [Data-centric fine-tuned chatbot](https://huggingface.co/spaces/ericbanzuzi/the-tome-llm) and [model](https://huggingface.co/ericbanzuzi/model_datacentric_llama_gguf).
 3. [Model-centric fine-tuned chatbot](https://huggingface.co/spaces/rcarioniporras/finetuned-llm) and [model](https://huggingface.co/rcarioniporras/model_modelcentric_llama_gguf).
+4. For faster interactions download the notebook in the folder `ui` and run it on Google Colab. 
 
 ---  
 

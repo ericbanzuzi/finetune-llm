@@ -17,7 +17,7 @@ def get_parser():
     parser = argparse.ArgumentParser()
     # Model arguments
     parser.add_argument("--max_seq_length", type=int, default=2048,  help=' Maximum sequence length for input text. Longer sequences require more memory.')
-    parser.add_argument("--load_in_4bit", type=bool, default=True, help='Use 4bit quantization to reduce memory usage. Can be False.') 
+    parser.add_argument("--load_in_4bit", type=bool, default=True, help='Use 4bit quantization to reduce memory usage.  Quantization reduces the precision of the numerical representation of model parameters (weights) from higher precision to lower precision. This reduces memory and speed ups computations. Can be False.') 
     parser.add_argument("--model_name", type=str, required=True, help='The specific pre-trained model to use. Choose for example one of the following models: [unsloth/Llama-3.2-1B-bnb-4bit, unsloth/Llama-3.2-1B-Instruct-bnb-4bit, unsloth/Llama-3.2-3B-bnb-4bit, unsloth/Llama-3.2-3B-Instruct-bnb-4bit]')
     parser.add_argument("--r", type=int, default=16, help='Controls the rank of the LoRA layers. A higher value retains more information but also increases computational cost. Suggested: 8, 16, 32, 64, 128') 
     parser.add_argument("--lora_dropout", type=float, default=0, help='Probability of zeroing out elements in LoRA matrices for regularization')
@@ -110,7 +110,7 @@ def get_trainer(model, tokenizer, dataset, args):
             gradient_accumulation_steps = args.gradient_accumulation_steps,
             warmup_steps = args.warmup_steps,
             num_train_epochs = args.num_train_epochs,
-            #max_steps = 2, # used for testing - delete
+            #max_steps = 2, # used for testing so that you don't need to wait for an entire epoch to finish
             learning_rate = args.learning_rate,
             fp16 = not is_bfloat16_supported(),
             bf16 = is_bfloat16_supported(),
@@ -127,6 +127,8 @@ def get_trainer(model, tokenizer, dataset, args):
         )
     )
 
+    # The questions are used to guide the response, but the model is not trained to regenerate or modify the user prompt.
+    # Its primary task is to focus on the assistant's reply.
     return train_on_responses_only(
         trainer, 
         instruction_part = "<|start_header_id|>user<|end_header_id|>\n\n",
